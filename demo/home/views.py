@@ -1,32 +1,74 @@
 from django.shortcuts import render, HttpResponse
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ValidationError
+import re
 from ollama import list
-import multiprocessing as mp
-import subprocess
+from .forms import create_chat_session, add_message_to_session
+from .models import ChatSession, ChatMessage
 
-processs = []
 
-def load_ollama():
-    try:
-        print("Loading Ollama...")
-        subprocess.run(['ollama', 'serve'], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error loading Ollama: {e}")
-
-def end_ollama(p):
-    if p.is_alive():
-        print("Stopping Ollama...")
-        p.terminate()
-    else:
-        print("Ollama process is not running.")
-
+available_models = [hey.model for m in list() for hey in m[1]]
 
 # Create your views here.
 def home(request):
-    p = mp.Process(target=load_ollama)
-    p.start()
-    processs.append(p)
-    return render(request, 'index.html')
+   return render(request, 'index.html')
 
 def model(request):
-    list_of_models = ([hey.model for m in list() for hey in m[1]])
-    return render(request, 'model.html', {'models': list_of_models})
+    return render(request, 'model.html', {'models': available_models})
+   
+@csrf_protect
+@require_http_methods(["POST"])
+def chat(request):
+    # Validation et nettoyage du pseudo
+    pseudo = request.POST.get('pseudo', '').strip()
+    if not pseudo:
+        return HttpResponse("Le pseudo est obligatoire.", status=400)
+    
+    # Validation du pseudo avec re.match (format strict)
+    if not re.match(r'^[a-zA-Z0-9_:]+$', pseudo):
+        return HttpResponse("Le pseudo contient des caractères non autorisés.", status=400)
+    
+    # Limiter la taille du pseudo
+    if len(pseudo) > 15:
+        return HttpResponse("Le pseudo est trop long (max 15 caractères).", status=400)
+    
+    # Validation et nettoyage du modèle
+    model = request.POST.get('model', '').strip()
+    if not model:
+        return HttpResponse("Le modèle est obligatoire.", status=400)
+    
+    # Validation du modèle avec re.match (format strict)
+    if not re.match(r'^[a-zA-Z0-9._:-]+$', model):
+        return HttpResponse("Le nom du modèle contient des caractères non autorisés.", status=400)
+    
+    # Vérifier que le modèle existe dans la liste des modèles disponibles
+    try:
+        if model not in available_models:
+            return HttpResponse("Modèle non autorisé.", status=400)
+    except Exception as e:
+        return HttpResponse("Erreur lors de la vérification du modèle.", status=500)
+    
+    # Traiter le nom du modèle (enlever la version si présente)
+    colon_position = model.find(':')
+    if colon_position != -1:  # Si ':' est trouvé
+        model = model[:colon_position]
+    
+    # Créer une nouvelle session de chat
+    session = create_chat_session(pseudo, model)
+    if not session:
+        return HttpResponse("Erreur lors de la création de la session.", status=500)
+    
+    # Ajouter le message de bienvenue du modèle
+    welcome_message = f"Bonjour {pseudo} ! Je suis prêt à discuter avec vous. Que souhaitez-vous me dire ?"
+    add_message_to_session(session, welcome_message, is_user=False)
+    
+    # Récupérer tous les messages de la session pour l'affichage
+    messages = session.messages.all()
+    
+    return render(request, 'chat.html', {
+        'pseudo': pseudo, 
+        'model': model,
+        'session': session,
+        'messages': messages
+    })
