@@ -3,12 +3,9 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 import re
-from ollama import list
-from .forms import create_chat_session, add_message_to_session
-from .models import ChatSession, ChatMessage
+from ollama import Client
 
-
-available_models = [hey.model for m in list() for hey in m[1]]
+available_models = [hey.model for m in Client(host='http://ollama:11434').list() for hey in m[1]]
 
 # Create your views here.
 def home(request):
@@ -53,22 +50,11 @@ def chat(request):
     colon_position = model.find(':')
     if colon_position != -1:  # Si ':' est trouvé
         model = model[:colon_position]
-    
-    # Créer une nouvelle session de chat
-    session = create_chat_session(pseudo, model)
-    if not session:
-        return HttpResponse("Erreur lors de la création de la session.", status=500)
-    
+   
     # Ajouter le message de bienvenue du modèle
     welcome_message = f"Bonjour {pseudo} ! Je suis prêt à discuter avec vous. Que souhaitez-vous me dire ?"
-    add_message_to_session(session, welcome_message, is_user=False)
-    
-    # Récupérer tous les messages de la session pour l'affichage
-    messages = session.messages.all()
     
     return render(request, 'chat.html', {
         'pseudo': pseudo, 
         'model': model,
-        'session': session,
-        'messages': messages
     })

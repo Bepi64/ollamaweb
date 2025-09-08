@@ -12,7 +12,6 @@ class ChatSession(models.Model):
     is_active = models.BooleanField(default=True, help_text="Session active ou terminée")
     
     class Meta:
-
         ordering = ['-created_at']
     
     def __str__(self):
@@ -49,3 +48,4 @@ class ChatMessage(models.Model):
     def sender_display(self):
         """Retourne l'affichage du sender"""
         return "Utilisateur" if self.is_user else "Modèle"
+
