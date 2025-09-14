@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Choix du modèle Ollama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+        h2 {
+            color: #2d3748;
+            text-align: center;
+        }
+        label {
+            font-size: 1.1em;
+            color: #444;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #cbd5e0;
+            background: #f9fafb;
+        }
+        .btn-valider {
+            display: block;
+            width: 100%;
+            background: #3182ce;
+            color: #fff;
+            padding: 12px 0;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(49,130,206,0.12);
+            transition: background 0.2s;
+            border: none;
+            margin-top: 30px;
+            cursor: pointer;
+        }
+        .btn-valider:hover {
+            background: #2563eb;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.98em;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Choisissez votre modèle Ollama</h2>
+        <form method="post" id="model-form" autocomplete="off" action="chat/">
+            {% csrf_token %}
+            <label for="pseudo-input">Pseudo :</label>
+            <input type="text" id="pseudo-input" name="pseudo" required pattern="[a-zA-Z0-9_:]+" maxlength="15" placeholder="Entrez votre pseudo">
+            <div id="pseudo-error" class="error-message" style="display:none;">Le pseudo ne peut pas être vide et doit être une chaîne de caractères.</div>
+            <label for="model-select">Modèle :</label>
+            <select id="model-select" name="model">
+                {% for model in models %}
+                    <option value="{{ model }}">{{ model }}</option>
+                {% empty %}
+                    <option disabled>Aucun modèle disponible</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-valider">Valider</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('model-form').addEventListener('submit', function(e) {
+            const pseudoInput = document.getElementById('pseudo-input');
+            const errorDiv = document.getElementById('pseudo-error');
+            const value = pseudoInput.value.trim();
+            
+            if (!value) {
+                errorDiv.textContent = "Le pseudo ne peut pas être vide.";
+                errorDiv.style.display = "block";
+                e.preventDefault();
+                return;
+            }
+            
+            if (typeof value != "string"){
+                 errorDiv.textContent = "Le pseudo doit être une string";
+                errorDiv.style.display = "block";
+                e.preventDefault();
+                return;
+            }
+            if (value.length > 15) {
+                errorDiv.textContent = "Le pseudo ne peut pas dépasser 15 caractères.";
+                errorDiv.style.display = "block";
+                e.preventDefault();
+                return;
+            }
+            
+            const validPattern = /^[a-zA-Z0-9_:]+$/;
+            if (!validPattern.test(value)) {
+                errorDiv.textContent = "Le pseudo ne peut contenir que des lettres, chiffres, underscores (_) et deux-points (:).";
+                errorDiv.style.display = "block";
+                e.preventDefault();
+                return;
+            }
+            
+            errorDiv.style.display = "none";
+        });
+    </script>
+</body>
+</html>

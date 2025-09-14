@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Présentation du projet : Chat Visuel Django & Ollama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .description {
+            color: #444;
+            font-size: 1.15em;
+            line-height: 1.7;
+        }
+
+        .tech-list {
+            margin-top: 25px;
+            padding-left: 20px;
+        }
+
+        .tech-list li {
+            margin-bottom: 8px;
+        }
+
+        .btn-suivant {
+            display: inline-block;
+            background: #3182ce;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(49, 130, 206, 0.12);
+            transition: background 0.2s;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-suivant:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Présentation du projet</h1>
+        <div class="description">
+            <p>
+                Ce projet consiste à créer un site web de chat visuel en utilisant <strong>Django</strong>.<br>
+                L'objectif est de permettre aux utilisateurs d'échanger avec des modèles d'intelligence artificielle
+                <strong>Ollama</strong> directement depuis une interface web simple et intuitive.
+            </p>
+            <ul class="tech-list">
+                <li><strong>Django</strong> : Framework web Python pour la gestion du backend et des vues.</li>
+                <li><strong>Ollama</strong> : Modèles d'IA pour générer des réponses aux messages des utilisateurs.</li>
+                <li><strong>HTML, CSS, JavaScript</strong> : Technologies utilisées pour l'interface utilisateur.</li>
+            </ul>
+            <p>
+                Ce projet est idéal pour découvrir l'intégration de l'IA dans des applications web modernes.
+            </p>
+        </div>
+        <div style="text-align:center; margin-top:30px;">
+            <a href="/model.html" class="btn-suivant">
+                Suivant &rarr;
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.querySelector('.container');
+            container.style.opacity = 0;
+            container.style.transform = 'translateY(40px)';
+            setTimeout(() => {
+                container.style.transition = 'opacity 0.7s, transform 0.7s';
+                container.style.opacity = 1;
+                container.style.transform = 'translateY(0)';
+            }, 100);
+
+            const btn = document.querySelector('.btn-suivant');
+            btn.addEventListener('mousedown', function () {
+                btn.style.transform = 'scale(0.97)';
+            });
+            btn.addEventListener('mouseup', function () {
+                btn.style.transform = 'scale(1)';
+            });
+            btn.addEventListener('mouseleave', function () {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+
+</html>
